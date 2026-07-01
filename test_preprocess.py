@@ -61,3 +61,52 @@ def test_empty_string_returns_empty_list(analyzer):
 
 def test_whitespace_only_returns_empty_list(analyzer):
     assert analyzer.preprocess("    \t\n  ") == []
+
+
+# ---------------------------------------------------------------------
+# score_text
+# ---------------------------------------------------------------------
+
+@pytest.fixture
+def scorer() -> MoodAnalyzer:
+    # Use the real default word lists so scoring reflects the shipped model.
+    return MoodAnalyzer()
+
+
+def test_positive_word_scores_up(scorer):
+    assert scorer.score_text("I love this class so much") == 1
+
+
+def test_negative_word_scores_down(scorer):
+    assert scorer.score_text("Today was a terrible day") == -1
+
+
+def test_neutral_text_scores_zero(scorer):
+    assert scorer.score_text("It is Tuesday") == 0
+
+
+def test_multiple_sentiment_words_accumulate(scorer):
+    # "happy" (+1) and "awesome" (+1) both count.
+    assert scorer.score_text("happy and awesome") == 2
+
+
+def test_negation_flips_positive_to_negative(scorer):
+    assert scorer.score_text("I am not happy about this") == -1
+
+
+def test_negation_flips_negative_to_positive(scorer):
+    assert scorer.score_text("not bad at all") == 1
+
+
+def test_negation_reaches_across_filler(scorer):
+    # "really" is filler and is skipped, so "not" still negates "happy".
+    assert scorer.score_text("not really happy") == -1
+
+
+def test_negation_uses_up_after_one_word(scorer):
+    # "never" flips "fun" (-1); the later "great" stays positive (+1) -> 0.
+    assert scorer.score_text("never fun but great") == 0
+
+
+def test_stopwords_do_not_affect_score(scorer):
+    assert scorer.score_text("the is a of to and but") == 0
