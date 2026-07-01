@@ -9,6 +9,8 @@ This class starts with very simple logic:
   - Convert that score into a mood label
 """
 
+import re
+
 from typing import List, Dict, Tuple, Optional
 
 from dataset import POSITIVE_WORDS, NEGATIVE_WORDS
@@ -52,8 +54,29 @@ class MoodAnalyzer:
           - Handle simple emojis separately (":)", ":-(", "🥲", "😂")
           - Normalize repeated characters ("soooo" -> "soo")
         """
+        # Common text emoticons we want to keep as their own tokens.
+        # (Order matters: match longer patterns like ":-)" before ":)".)
+        EMOTICON_PATTERN = r":-?\)|:-?\(|:-?D|:-?P|;-?\)|<3|:'\(|:\||:/"
+
         cleaned = text.strip().lower()
-        tokens = cleaned.split()
+
+        # 1. Pull out emoticons and emoji BEFORE stripping punctuation, so
+        #    signals like ":)" aren't destroyed when we remove punctuation.
+        symbol_tokens: List[str] = re.findall(EMOTICON_PATTERN, cleaned)
+        symbol_tokens += re.findall(r"[\U0001F000-\U0001FAFF☀-➿]", cleaned)
+
+        # 2. Remove the emoticons/emoji from the text now that they're saved,
+        #    then drop any remaining punctuation (keep letters, digits, spaces).
+        cleaned = re.sub(EMOTICON_PATTERN, " ", cleaned)
+        cleaned = re.sub(r"[^\w\s]", " ", cleaned, flags=re.UNICODE)
+
+        # 3. Normalize runs of 3+ identical characters ("soooo" -> "soo"),
+        #    keeping two so intentional doubles ("cool") survive.
+        cleaned = re.sub(r"(.)\1{2,}", r"\1\1", cleaned)
+
+        # 4. Split the leftover text into word tokens and combine with symbols.
+        word_tokens = cleaned.split()
+        tokens = word_tokens + symbol_tokens
 
         return tokens
 
