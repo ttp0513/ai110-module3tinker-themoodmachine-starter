@@ -87,8 +87,23 @@ TRUE_LABELS = [
 #
 # Example of how you might extend the lists:
 #
-# SAMPLE_POSTS.append("Lowkey stressed but kind of proud of myself")
-# TRUE_LABELS.append("mixed")
+SAMPLE_POSTS.append("Lowkey stressed but kind of proud of myself")
+TRUE_LABELS.append("mixed")
+
+SAMPLE_POSTS.append("This class is meh")
+TRUE_LABELS.append("negative")
+
+SAMPLE_POSTS.append("This course hits different")
+TRUE_LABELS.append("positive")
+
+SAMPLE_POSTS.append("The teacher slayyyyed the material")
+TRUE_LABELS.append("positive")
+
+SAMPLE_POSTS.append("The teacher lost me")
+TRUE_LABELS.append("negative")
+
+SAMPLE_POSTS.append("It is Tuesday")
+TRUE_LABELS.append("neutral")
 #
 # Remember to keep them aligned:
-#   len(SAMPLE_POSTS) == len(TRUE_LABELS)
+# len(SAMPLE_POSTS) == len(TRUE_LABELS)
